@@ -102,6 +102,9 @@ If you don't want to write personas by hand, use the `generate_persona.py` scrip
     
     *Result:* `personas/geoffrey_hinton.txt` is created automatically.
 
+🎛️ Tuning the Synthesizer
+The `personas/synthesizer.md` file acts as the "triage" of this brainstorming. **You should edit this prompt** to match the specific funding opportunity you are targeting. You must also instruct the synthesizer on your specific goals: do you want it to find a cohesive narrative (the "Golden Thread"), conduct a brutal risk assessment, or focus on commercial viability? Tailoring this prompt ensures the final **Action Plan** is optimized for your specific success criteria.
+
 📄 License
 
 MIT
