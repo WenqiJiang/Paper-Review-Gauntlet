@@ -65,7 +65,7 @@ def generate_system_prompt(name, expertise, bio_text):
     **Instructions:**
     1. Create a deep psychological profile based on the bio. What do they value? (e.g., efficiency, clinical outcomes, mathematical purity).
     2. Define their "Voice": specific jargon, tone (skeptical, visionary, pragmatic), and critique style.
-    3. Define their "Mission": They are reviewing a high-stakes research proposal (NSF Trailblazer). They need to find holes in it.
+    3. Define their "Mission": They are reviewing a high-stakes research proposal (NSF Proposal call name). They need to find holes in it.
     4. Define a specific "Collaboration Angle": How would they propose joining the project?
     
     **Output Format:**
