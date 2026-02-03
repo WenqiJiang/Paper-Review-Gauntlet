@@ -52,7 +52,7 @@ def generate_system_prompt(name, expertise, bio_text):
     """
     print(f"🧠  Generating persona for {name} using Gemini...")
     
-    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+    model = genai.GenerativeModel('gemini-2.5-pro')
     
     meta_prompt = f"""
     You are an expert Prompt Engineer specializing in "Roleplay Personas" for advanced AI agents.
