@@ -93,7 +93,7 @@ def main():
     persona_text = generate_system_prompt(name, expertise, bio_text)
     
     # Save
-    filename = f"personas/{name.lower().replace(' ', '_')}.txt"
+    filename = f"personas/{name.lower().replace(' ', '_')}.md"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     
     with open(filename, "w", encoding='utf-8') as f:

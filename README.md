@@ -2,13 +2,13 @@ Gauntlet 🥊
 
 A combinatorial multi-agent stress test for high-stakes research proposals.
 
-Gauntlet is a "virtual brainstorming engine" designed to subject research proposals (specifically one's that are a bit cross-cutting across areas) to intense scrutiny from simulated domain experts. It uses the Anthropic Claude 4 Opus API to create a divergence-convergence feedback loop.
+Gauntlet is a "virtual brainstorming engine" designed to subject research proposals (specifically one's that are a bit cross-cutting across areas) to intense scrutiny from simulated domain experts. It uses the Anthropic Claude Opus 4.5 API to create a divergence-convergence feedback loop.
 
 Instead of a single review, Gauntlet explodes the solution space:
 
-    Divergence: Three distinct expert personas critique the proposal, each generating 3 unique strategic pivots (Total: 9 distinct vectors).
+    Divergence: Three distinct expert personas each critique the proposal three times at different temperatures (0.3, 0.7, 1.0), naturally producing conservative, balanced, and divergent takes (Total: 9 distinct critiques).
 
-    Convergence (The Flywheel): A "Synthesizer" agent permutes these vectors to generate 27 unique strategic synthesis reports, helping you find the "Golden Thread" narrative that satisfies all constraints.
+    Convergence (The Flywheel): A "Synthesizer" agent takes every combination of one critique per expert (3³ = 27) and generates a unique strategic synthesis report for each, helping you find the "Golden Thread" narrative that satisfies all constraints.
 
 Names below are fictitious names to just explain the readme!
 
@@ -16,18 +16,25 @@ Names below are fictitious names to just explain the readme!
 
 Gauntlet/
 ├── inputs/
-│   ├── proposal_call.pdf       # The funding solicitation (NSF Trailblazer)
-│   └── my_proposal.pdf         # The preliminary draft
+│   ├── proposal_call.pdf               # The funding solicitation (NSF Trailblazer)
+│   └── my_proposal.pdf                 # The preliminary draft
 ├── personas/
-│   ├── dr_silas_vane.txt       # Chaos Control & Swarm Dynamics Expert
-│   ├── prof_amara_kito.txt     # Bio-Photonic Interfaces Expert
-│   ├── dr_julian_rex.txt       # Exascale Cognitive Systems Expert
-│   └── synthesizer.txt         # The Strategy Lead System Prompt
+│   ├── dr_silas_vane.md                # Chaos Control & Swarm Dynamics Expert
+│   ├── prof_amara_kito.md              # Bio-Photonic Interfaces Expert
+│   ├── dr_julian_rex.md                # Exascale Cognitive Systems Expert
+│   └── synthesizer.md                  # The Strategy Lead System Prompt
 ├── outputs/
-│   ├── 01_raw_reviews/         # The 9 initial critique vectors
-│   └── 02_synthesis_reports/   # The 27 combinatorial action plans
-├── .env                        # ANTHROPIC_API_KEY
-└── main.py                     # Orchestration & Permutation logic
+│   ├── RUN_CONFIG.md                   # Run metadata & naming guide
+│   ├── expert_reviews/                 # The 9 critiques (3 personas × 3 temps)
+│   │   ├── dr_silas_vane/              #   run_1.md  run_2.md  run_3.md
+│   │   ├── prof_amara_kito/
+│   │   └── dr_julian_rex/
+│   └── syntheses/                      # 27 self-contained action-plan folders
+│       ├── silas_1__amara_1__julian_1/ #   SYNTHESIS.md + 3 source reviews
+│       └── …
+├── generate_persona.py                 # Optional: auto-generates persona .md files
+├── .env                                # ANTHROPIC_API_KEY
+└── main.py                             # Orchestration & permutation logic
 
 🧠 The Expert Panel (Simulated)
 
@@ -47,11 +54,11 @@ Gauntlet/
 
     Ingestion: The engine reads the proposal_call.pdf and my_proposal.pdf.
 
-    The Gauntlet (Phase 1): The three experts read the documents. Instead of one generic review, they are prompted to generate 3 distinct "Strategic Angles" or pivots each (e.g., "The Low-Power Angle," "The Data-Scale Angle," "The Clinical-First Angle").
+    The Gauntlet (Phase 1 — Divergence): Each expert reviews the proposal three times, once at each temperature (0.3, 0.7, 1.0). Low temperature yields precise, conservative critiques; high temperature yields creative, divergent pivots. This produces 9 distinct critique vectors with no manual prompt engineering.
 
-    The Permutation (Phase 2): The system takes the Cartesian product of these angles (3 experts × 3 angles = 27 combinations).
+    The Flywheel (Phase 2 — Convergence): The system computes the Cartesian product — one run per expert — giving 3³ = 27 unique input combinations. The Synthesizer agent produces a cohesive Action Plan for each. Every output folder is self-contained: SYNTHESIS.md plus copies of the three source reviews that fed it.
 
-    The Synthesis (Phase 3): The Synthesizer agent generates a cohesive Action Plan for every single combination, allowing you to explore different narrative "flavors" for your final proposal.
+    Idempotent Resume: If you hit a rate limit mid-run, just re-run main.py. It skips any output that already exists and picks up exactly where it left off.
 
 🛠 Usage
 
@@ -74,7 +81,7 @@ Gauntlet/
 
 🧬 Generator Tool (Optional)
 
-If you don't want to write personas by hand, use the `generate_persona.py` script. It scrapes a researcher's website and uses Google Gemini to "clone" their writing style and expertise into a system prompt.
+If you don't want to write personas by hand, use the `generate_persona.py` script. It scrapes a researcher's website and uses Google Gemini to "clone" their writing style and expertise into a `.md` persona file in `personas/`.
 
 1.  **Get a Google API Key** (Free tier available): [Google AI Studio](https://aistudio.google.com/app/apikey)
 2.  **Add to `.env`**:
@@ -93,7 +100,7 @@ If you don't want to write personas by hand, use the `generate_persona.py` scrip
     *Input:* "Deep Learning"
     *Input:* https://en.wikipedia.org/wiki/University_of_Toronto
     
-    *Result:* `personas/geoffrey_hinton.txt` is created automatically.
+    *Result:* `personas/geoffrey_hinton.md` is created automatically.
 
 📄 License
 
