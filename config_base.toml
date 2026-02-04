@@ -1,0 +1,16 @@
+# Synthesizer persona (personas/{name}.md)
+synthesizer = "synthesizer"
+
+# Expert-reviewer personas — order here controls combo-label order.
+# Add or remove entries to change which personas run for this project.
+[[personas]]
+name  = "dr_silas_vane"
+short = "silas"
+
+[[personas]]
+name  = "prof_amara_kito"
+short = "amara"
+
+[[personas]]
+name  = "dr_julian_rex"
+short = "julian"

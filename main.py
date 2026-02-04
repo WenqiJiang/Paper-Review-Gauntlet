@@ -28,10 +28,12 @@ outputs/
     └── …                                  # 27 folders total
 """
 
+import argparse
 import itertools
 import os
 import shutil
 import sys
+import tomllib
 from pathlib import Path
 from typing import Optional
 
@@ -44,6 +46,9 @@ from pypdf import PdfReader
 # ---------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
+
+with open(BASE_DIR / "config.toml", "rb") as _f:
+    _CFG = tomllib.load(_f)
 
 MODEL = "claude-opus-4-5-20251101"
 
@@ -60,18 +65,10 @@ SYNTH_TEMP: float = 0.5
 # SDK-level retries — handles transient 429s with exponential back-off.
 MAX_RETRIES: int = 5
 
-PERSONA_ORDER: list[str] = [
-    "dr_silas_vane",
-    "prof_amara_kito",
-    "dr_julian_rex",
-]
-
-# Short labels used in combo directory names.
-PERSONA_SHORT: dict[str, str] = {
-    "dr_silas_vane":   "silas",
-    "prof_amara_kito": "amara",
-    "dr_julian_rex":   "julian",
-}
+# Persona list, short labels, and synthesizer are driven by config.toml.
+PERSONA_ORDER: list[str]      = [p["name"] for p in _CFG["personas"]]
+PERSONA_SHORT: dict[str, str] = {p["name"]: p["short"] for p in _CFG["personas"]}
+SYNTHESIZER:   str            = _CFG["synthesizer"]
 
 
 # ---------------------------------------------------------------------------
@@ -123,14 +120,14 @@ def is_valid_output(path: Path) -> bool:
 # Phase 1 — expert reviews  (sequential, idempotent)
 # ---------------------------------------------------------------------------
 
-def phase1(client: Anthropic, context: str) -> dict[str, dict[int, str]]:
+def phase1(client: Anthropic, context: str, out_root: Path) -> dict[str, dict[int, str]]:
     """Run (or resume) 9 expert reviews.  Returns {persona: {run_idx: text}}."""
     reviews: dict[str, dict[int, str]] = {p: {} for p in PERSONA_ORDER}
 
     for persona in PERSONA_ORDER:
         prompt = load_persona(persona)
         for i, temp in enumerate(TEMPERATURES, start=1):
-            out_dir  = BASE_DIR / "outputs" / "expert_reviews" / persona
+            out_dir  = out_root / "expert_reviews" / persona
             out_dir.mkdir(parents=True, exist_ok=True)
             out_file = out_dir / f"run_{i}.md"
 
@@ -165,6 +162,7 @@ def phase2(
     call_text: str,
     proposal_text: str,
     reviews: dict[str, dict[int, str]],
+    out_root: Path,
 ) -> None:
     """Run (or resume) all 27 syntheses.  Each folder is self-contained."""
     combos = list(itertools.product(
@@ -173,7 +171,7 @@ def phase2(
 
     for combo in combos:
         label   = combo_label(combo)
-        out_dir = BASE_DIR / "outputs" / "syntheses" / label
+        out_dir = out_root / "syntheses" / label
         out_dir.mkdir(parents=True, exist_ok=True)
         synth_file = out_dir / "SYNTHESIS.md"
 
@@ -188,7 +186,7 @@ def phase2(
 
         print(f"  [synth]   {label}")
 
-        system_prompt = load_persona("synthesizer")
+        system_prompt = load_persona(SYNTHESIZER)
 
         # Tag each review with run index & temperature for the synthesiser.
         review_block = "\n\n".join(
@@ -218,7 +216,7 @@ def phase2(
 
         # Copy the 3 source reviews that fed this combo into the folder.
         for persona, run_idx in zip(PERSONA_ORDER, combo):
-            src = BASE_DIR / "outputs" / "expert_reviews" / persona / f"run_{run_idx}.md"
+            src = out_root / "expert_reviews" / persona / f"run_{run_idx}.md"
             shutil.copy2(src, out_dir / f"{persona}_review.md")
 
     print(f"\n  -> phase 2 complete\n")
@@ -228,7 +226,7 @@ def phase2(
 # Run-config writer
 # ---------------------------------------------------------------------------
 
-def write_run_config() -> None:
+def write_run_config(out_root: Path) -> None:
     """Drop a human-readable summary of run parameters into outputs/."""
     lines = [
         "# Gauntlet — Run Configuration",
@@ -258,7 +256,7 @@ def write_run_config() -> None:
         "source reviews that produced it — no need to cross-reference.",
         "",
     ]
-    (BASE_DIR / "outputs" / "RUN_CONFIG.md").write_text("\n".join(lines), encoding="utf-8")
+    (out_root / "RUN_CONFIG.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -266,6 +264,18 @@ def write_run_config() -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Gauntlet — flywheel multi-agent review engine")
+    parser.add_argument("call_pdf",     type=Path, help="solicitation / call-for-proposals PDF")
+    parser.add_argument("proposal_pdf", type=Path, help="your proposal PDF")
+    parser.add_argument("-o", "--output", type=Path, default=BASE_DIR / "outputs",
+                        help="output directory (default: <script dir>/outputs)")
+    args = parser.parse_args()
+
+    out_root = args.output
+    if out_root.exists() and any(out_root.iterdir()):
+        if input(f"  {out_root} already has contents — resume? [y/N] ").strip().lower() != "y":
+            sys.exit("Aborted.")
+
     api_key: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         sys.exit("ERROR: ANTHROPIC_API_KEY not set. Check your .env file.")
@@ -275,25 +285,25 @@ def main() -> None:
 
     # --- Ingestion ---
     print("[setup]   Loading documents…")
-    call_text     = load_pdf_text(BASE_DIR / "inputs" / "proposal_call.pdf")
-    proposal_text = load_pdf_text(BASE_DIR / "inputs" / "my_proposal.pdf")
+    call_text     = load_pdf_text(args.call_pdf)
+    proposal_text = load_pdf_text(args.proposal_pdf)
     context       = build_context(call_text, proposal_text)
     print(f"          {len(call_text):,} chars (call) + {len(proposal_text):,} chars (proposal)\n")
 
     # --- Metadata ---
-    (BASE_DIR / "outputs").mkdir(exist_ok=True)
-    write_run_config()
+    out_root.mkdir(exist_ok=True)
+    write_run_config(out_root)
 
     n_reviews   = len(PERSONA_ORDER) * len(TEMPERATURES)
     n_syntheses = len(TEMPERATURES) ** len(PERSONA_ORDER)
 
     # --- Phase 1: expert reviews (sequential, resumes from cached outputs) ---
     print(f"[phase 1] {n_reviews} expert reviews  (sequential, idempotent)\n")
-    reviews = phase1(client, context)
+    reviews = phase1(client, context, out_root)
 
     # --- Phase 2: syntheses (sequential, resumes from cached outputs) ---
     print(f"[phase 2] {n_syntheses} syntheses       (sequential, idempotent)\n")
-    phase2(client, call_text, proposal_text, reviews)
+    phase2(client, call_text, proposal_text, reviews, out_root)
 
     # --- Summary ---
     print("[done]")
