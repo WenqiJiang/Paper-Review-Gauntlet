@@ -1,0 +1,112 @@
+# --- Processor & Microarchitecture ---
+Branch Prediction and Speculative Execution
+Hardware Prefetching Mechanisms
+Cache Replacement Policies and Compression
+Superscalar Instruction Issue Logic
+Value Prediction Techniques
+Register File Optimization and Renaming
+Hardware Transactional Memory
+ISA Extensions for Security
+Transient Execution Attack Mitigation (Spectre/Meltdown)
+Reliability and Error Correction (ECC) for Logic
+Post-Silicon Validation and Debug
+Processor Microarchitecture
+Hardware Security
+
+# --- Memory Systems ---
+DRAM Controller Optimization
+High Bandwidth Memory (HBM) Architectures
+Non-Volatile Memory (NVM/PCM/ReRAM) Systems
+In-Memory Computing (PIM) Architectures
+Virtual Memory and TLB Design
+Cache Coherence Protocols
+Rowhammer Attacks and Defenses
+Disaggregated Memory Systems via CXL
+Computational Storage Drives
+Emerging Memory Technologies (MRAM/FeRAM)
+Memory Systems
+
+# --- Parallelism & Accelerators ---
+GPU Microarchitecture and SIMT Execution
+Tensor Core Design for AI Training
+Sparsity-Aware Machine Learning Accelerators
+Systolic Array Architectures
+FPGA Overlay Architectures
+Coarse-Grained Reconfigurable Arrays (CGRAs)
+Graph Processing Accelerators
+Genomic Sequencing Accelerators
+Neuromorphic and Spiking Neural Networks
+Homomorphic Encryption Acceleration
+Accelerator
+
+# --- Interconnects & Networking ---
+Network-on-Chip (NoC) Topology and Routing
+Optical Interconnects and Silicon Photonics
+Chiplet Interfaces (UCIe/BoW)
+Wireless On-Chip Networks
+SmartNICs and Data Processing Units (DPUs)
+Datacenter Transport Protocol Offload
+Congestion Control for Large Scale Fabrics
+Networking
+
+# --- Datacenter & Cloud ---
+Serverless Computing Hardware Support
+Microservices Acceleration
+Datacenter Power Management and Cooling
+Warehouse-Scale Computer Reliability
+Hardware-Assisted Virtualization
+Cloud FPGA Multi-Tenancy
+Sustainable and Carbon-Aware Computing
+Datacenter and Cloud
+
+# --- Edge, IoT & Mobile ---
+Ultra-Low Power Core Design
+Energy Harvesting Architectures
+Edge AI Inference Accelerators
+Real-Time Systems Architecture
+Mobile SoC Heterogeneity (Big.Little)
+Approximate Computing for Energy Efficiency
+Intermittent Computing Architectures
+Edge and IoT
+
+# --- Emerging Technologies ---
+Superconducting Logic (Josephson Junctions)
+Carbon Nanotube FET Architectures
+DNA Data Storage Systems
+3D Stacking and Monolithic 3D ICs
+Optical Computing Co-Processors
+Other Emerging Technology
+
+# --- Quantum Computing ---
+Quantum Error Correction (QEC) Decoders
+Cryogenic Control Microarchitecture for Qubits
+Quantum ISA and Transpilation
+Noise-Aware Quantum Compilation
+Distributed Quantum Networking
+Neutral Atom Quantum Architectures
+Superconducting Transmon Architectures
+Quantum Computing
+
+# --- Tools & Methodology ---
+FPGA-Based Emulation (FireSim/OpenPiton)
+Sampled Simulation Methodologies
+Power and Thermal Modeling Tools
+Formal Verification of Hardware RTL
+Workload Characterization (LLMs/Microservices)
+Full-System Profiling and Tracing
+Analytical Modeling of Performance
+Simulation and Tools
+
+# --- Deep Learning & AI Hardware ---
+Hardware Support for Micro-Scaling Formats (MX) and FP4
+KV-Cache Compression and Paged Memory Management for LLMs
+N:M Structured Sparsity and Dynamic Pruning Accelerators
+Hardware-Accelerated Speculative Decoding for LLMs
+Processing-in-Memory (PIM) for Bandwidth-Bound DL Workloads
+Near-Memory Processing for Recommendation Embedding Tables
+Gradient Compression and Synchronization for Distributed Training
+Graph Neural Network (GNN) Aggregation Accelerators
+Wafer-Scale and Chiplet Interconnects for Trillion-Parameter Models
+Silent Data Corruption (SDC) Detection and Mitigation in AI Training
+Deep Learnging and AI Hardware Inference
+Deep Learnging and AI Hardware Training

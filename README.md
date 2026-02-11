@@ -123,6 +123,16 @@ If you don't want to write personas by hand, use the `generate_persona.py` scrip
 🎛️ Tuning the Synthesizer
 The `personas/synthesizer.md` file acts as the "triage" of this brainstorming. **You should edit this prompt** to match the specific funding opportunity you are targeting. You must also instruct the synthesizer on your specific goals: do you want it to find a cohesive narrative (the "Golden Thread"), conduct a brutal risk assessment, or focus on commercial viability? Tailoring this prompt ensures the final **Action Plan** is optimized for your specific success criteria.
 
+📖 Paper Reading Mode
+
+Gauntlet can also be used to deeply analyze research papers. Instead of a proposal review, configure it with paper-reading personas and use a simple placeholder PDF (e.g., `inputs/readpaper.pdf`) as the "call" argument, with the research paper as the "proposal":
+
+```bash
+python main.py inputs/readpaper.pdf inputs/paper_to_analyze.pdf -c config_readpaper.toml
+```
+
+The expert reviewers will deconstruct the paper from different technical angles, and the synthesizer can produce teaching-focused summaries. Use specialized configs (e.g., `config_readpaper_archgeneric.toml`) with personas tuned for paper analysis rather than proposal critique.
+
 📄 License
 
 MIT

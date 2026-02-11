@@ -1,2 +1,6 @@
 /outputs/
 .env
+.pdf
+/projects/
+/scratch/
+/runs/

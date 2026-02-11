@@ -146,11 +146,15 @@ def main() -> None:
     # --- Generate personas ---
     for topic in topics:
         try:
-            persona_content = generate_persona(client, topic, template_content)
-
             filename = sanitize_filename(topic)
             filepath = args.output / filename
 
+            # --- resume: skip if already exists ---
+            if filepath.exists():
+                print(f"   [skip]    {topic:50s} (cached)")
+                continue
+
+            persona_content = generate_persona(client, topic, template_content)
             filepath.write_text(persona_content, encoding="utf-8")
 
             print(f"   ✅ Saved: {filepath}\n")
