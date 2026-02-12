@@ -1,4 +1,4 @@
-/outputs/
+#/outputs/
 .env
 .pdf
 /projects/
@@ -7,3 +7,9 @@
 /personas_TB/
 /inputs_TB/
 /inputs_CS1000/
+*swp
+
+# User-created persona configs (keep example)
+persona_config.json
+my_*.json
+*_personas.json

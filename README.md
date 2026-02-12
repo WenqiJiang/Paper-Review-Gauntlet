@@ -24,10 +24,28 @@ Think of it as a **virtual committee meeting** where experts debate your work fr
 
 ## Quick Start
 
-### 1. Installation
+### 1. Environment Setup (Recommended)
+
+Create a conda environment with Python 3.10+:
 
 ```bash
+# Create conda environment
+conda create -n paper-review python=3.11 -y
+conda activate paper-review
+
+# Install core dependencies
 pip install anthropic pypdf python-dotenv
+
+# Install persona generator dependencies (for web scraping)
+pip install beautifulsoup4 requests
+
+# Optional: Install idea generator dependency
+pip install markdown-pdf
+```
+
+**Alternative (without conda):**
+```bash
+pip install anthropic pypdf python-dotenv beautifulsoup4 requests
 ```
 
 ### 2. Setup
@@ -38,16 +56,18 @@ Create a `.env` file with your API key:
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+That's it! The same API key is used for both persona generation and reviews.
+
 ### 3. Run
 
 **For paper criticism (most common use case):**
 
 ```bash
 # Basic run with existing personas
-python main.py inputs/placeholder.pdf inputs/your_paper.pdf
+python main.py inputs/review_paper.pdf inputs/your_paper.pdf
 
-# Or with a custom config
-python main.py inputs/placeholder.pdf inputs/your_paper.pdf -c config_archresearch.toml
+# Or with a custom config -> leave placeholder.pdf as is
+python main.py inputs/review_paper.pdf inputs/your_paper.pdf -c config_archresearch.toml
 ```
 
 **For proposal review:**
@@ -110,25 +130,66 @@ Example personas include experts in microarchitecture, workload analysis, simula
 
 #### Option B: Generate Custom Personas (Recommended)
 
-Create personas that match your paper's domain and target venue's typical reviewers:
+Create personas that match your paper's domain and target venue's typical reviewers.
 
+**Setup (one-time):**
 ```bash
-# Install additional requirements
-pip install google-generativeai beautifulsoup4 requests
+# Install dependencies (skip if already in conda env)
+pip install beautifulsoup4 requests
 
-# Add Google API key to .env (free tier at https://aistudio.google.com/app/apikey)
-echo "GOOGLE_API_KEY=your_key_here" >> .env
-
-# Run the generator
-python generate_persona.py
+# Make sure ANTHROPIC_API_KEY is in your .env (same key used for reviews)
 ```
 
-**Interactive prompts:**
-- **Researcher name**: "Onur Mutlu" (or any expert name)
-- **Research area**: "Computer Architecture, Memory Systems"
-- **URL** (optional): "https://people.inf.ethz.ch/omutlu/"
+**Three ways to generate personas:**
 
-The script creates `personas/onur_mutlu.md` automatically.
+**1. Batch mode (most efficient) - Recommended:**
+```bash
+# Create a config file (see persona_config.example.json)
+cp persona_config.example.json my_personas.json
+# Edit my_personas.json with your desired experts
+
+# Generate all personas at once
+python generate_persona.py -c my_personas.json
+```
+
+**2. Single persona with arguments:**
+```bash
+python generate_persona.py \
+  -n "Gustavo Alonso" \
+  -e "Database Systems, Distributed Systems" \
+  -u "https://people.inf.ethz.ch/alonso/"
+```
+
+**3. Interactive mode (legacy):**
+```bash
+python generate_persona.py
+# Follow prompts for name, expertise, URL
+```
+
+**Config file format (`persona_config.json`):**
+```json
+{
+  "personas": [
+    {
+      "name": "Gustavo Alonso",
+      "expertise": "Database Systems, Distributed Systems",
+      "url": "https://people.inf.ethz.ch/alonso/"
+    },
+    {
+      "name": "Torsten Hoefler",
+      "expertise": "High-Performance Computing, Parallel Computing",
+      "url": "https://htor.inf.ethz.ch/"
+    },
+    {
+      "name": "Fei-Fei Li",
+      "expertise": "Computer Vision, Machine Learning",
+      "url": "https://profiles.stanford.edu/fei-fei-li"
+    }
+  ]
+}
+```
+
+The script creates `personas/{name}.md` files automatically.
 
 **Pro tip for paper reviews**: Generate 3-4 personas representing:
 1. **Methodology critic** - Focuses on experimental rigor, baselines, statistical significance
@@ -146,20 +207,20 @@ synthesizer = "synthesizer_paper_analyst"
 
 # Expert-reviewer personas (add 3-4 for comprehensive coverage)
 [[personas]]
-name  = "onur_mutlu"
-short = "mutlu"
+name  = "gustavo_alonso"
+short = "alonso"
+
+[[personas]]
+name  = "torsten_hoefler"
+short = "hoefler"
+
+[[personas]]
+name  = "fei_fei_li"
+short = "ffl"
 
 [[personas]]
 name  = "prof_methodology_expert"
 short = "method"
-
-[[personas]]
-name  = "dr_practitioner"
-short = "practice"
-
-[[personas]]
-name  = "senior_generalist"
-short = "senior"
 ```
 
 **Notes:**
@@ -239,29 +300,32 @@ After the run completes, check your output directory:
 outputs/paper_review_jan2026/
 ├── RUN_CONFIG.md                    # Metadata about this run
 ├── expert_reviews/                  # Individual reviews
-│   ├── onur_mutlu/
+│   ├── gustavo_alonso/
 │   │   ├── run_1.md                # Conservative (temp 0.3)
 │   │   ├── run_2.md                # Balanced (temp 0.7)
 │   │   └── run_3.md                # Creative (temp 1.0)
-│   ├── prof_methodology_expert/
+│   ├── torsten_hoefler/
 │   │   └── ...
-│   └── ...
+│   ├── fei_fei_li/
+│   │   └── ...
+│   └── prof_methodology_expert/
+│       └── ...
 └── syntheses/                       # Combined analyses
-    ├── mutlu_1__method_1__practice_1__senior_1/
+    ├── alonso_1__hoefler_1__ffl_1__method_1/
     │   ├── SYNTHESIS.md            # ← START HERE
-    │   ├── onur_mutlu_review.md
-    │   ├── prof_methodology_expert_review.md
-    │   ├── dr_practitioner_review.md
-    │   └── senior_generalist_review.md
+    │   ├── gustavo_alonso_review.md
+    │   ├── torsten_hoefler_review.md
+    │   ├── fei_fei_li_review.md
+    │   └── prof_methodology_expert_review.md
     └── ...                          # More synthesis combinations
 ```
 
 #### Reading Strategy
 
 1. **Start with 2-3 synthesis reports** from different temperature combinations:
-   - `mutlu_1__method_1__practice_1__senior_1/` (all conservative)
-   - `mutlu_2__method_2__practice_2__senior_2/` (all balanced)
-   - `mutlu_3__method_3__practice_3__senior_3/` (all creative)
+   - `alonso_1__hoefler_1__ffl_1__method_1/` (all conservative)
+   - `alonso_2__hoefler_2__ffl_2__method_2/` (all balanced)
+   - `alonso_3__hoefler_3__ffl_3__method_3/` (all creative)
 
 2. **Identify recurring themes**:
    - What issues appear in *all* synthesis reports? → High priority fixes
@@ -304,17 +368,24 @@ Compare the new synthesis reports with the old ones:
 
 ## 🧬 Persona Generator Details
 
-The `generate_persona.py` script is powerful for creating realistic expert reviewers. Here's what it does:
+The `generate_persona.py` script creates realistic expert reviewers using Claude. Here's what it does:
 
 ### How It Works
 
 1. **Web scraping**: Fetches content from the provided URL (researcher homepage, lab page, etc.)
 2. **Content extraction**: Pulls research interests, paper titles, project descriptions
-3. **Persona generation**: Uses Google Gemini to create a review persona that captures:
+3. **Persona generation**: Uses Claude Sonnet 4.5 to create a review persona that captures:
    - Research focus and expertise areas
    - Reviewing style and priorities
    - Common questions/concerns they'd raise
    - Tone and perspective
+
+### Cost
+
+**~$0.01-0.05 per persona** with Claude Sonnet 4.5
+- Generating 10 personas: ~$0.30
+- Negligible compared to review costs ($5-80 per Gauntlet run)
+- High quality output that's consistent with your review personas
 
 ### Tips for Good Personas
 
@@ -335,26 +406,44 @@ The `generate_persona.py` script is powerful for creating realistic expert revie
 - Lab/group websites
 - Wikipedia pages for well-known researchers
 
-**Example persona generation workflow:**
+**Example batch persona generation workflow:**
 
 ```bash
-python generate_persona.py
-# Input: "Onur Mutlu"
-# Input: "Computer Architecture, Memory Systems, Hardware Security"
-# Input: https://people.inf.ethz.ch/omutlu/
+# 1. Create a config file with all experts you want
+cat > my_reviewers.json << 'EOF'
+{
+  "personas": [
+    {
+      "name": "Gustavo Alonso",
+      "expertise": "Database Systems, Distributed Systems, Cloud Computing",
+      "url": "https://people.inf.ethz.ch/alonso/"
+    },
+    {
+      "name": "Torsten Hoefler",
+      "expertise": "High-Performance Computing, Parallel Computing",
+      "url": "https://htor.inf.ethz.ch/"
+    },
+    {
+      "name": "Christos Kozyrakis",
+      "expertise": "Datacenters, Cloud Computing, Computer Architecture",
+      "url": "https://web.stanford.edu/~kozyraki/"
+    },
+    {
+      "name": "Pieter Abbeel",
+      "expertise": "Robotics, Reinforcement Learning, Machine Learning",
+      "url": "https://people.eecs.berkeley.edu/~pabbeel/"
+    }
+  ]
+}
+EOF
 
-python generate_persona.py
-# Input: "Christos Kozyrakis"
-# Input: "Datacenters, Cloud Computing, Computer Architecture"
-# Input: https://web.stanford.edu/~kozyraki/
+# 2. Generate all personas in one command
+python generate_persona.py -c my_reviewers.json
 
-python generate_persona.py
-# Input: "Margaret Martonosi"
-# Input: "Mobile Computing, Sustainability, Computer Architecture"
-# Input: https://www.cs.princeton.edu/~mrm/
+# Output: personas/gustavo_alonso.md, personas/torsten_hoefler.md, etc.
 ```
 
-This gives you three diverse architecture researchers with different focuses.
+This gives you diverse experts across databases, HPC, cloud systems, and robotics/ML, generated efficiently in batch.
 
 ---
 
@@ -522,6 +611,34 @@ short = "e2"
 
 # Add more personas as needed
 ```
+
+---
+
+## 🐍 Environment Management
+
+### Using Conda (Recommended)
+
+```bash
+# Activate environment before each session
+conda activate gauntlet
+
+# Deactivate when done
+conda deactivate
+
+# Update dependencies
+conda activate gauntlet
+pip install --upgrade anthropic pypdf python-dotenv
+
+# Remove environment (if needed)
+conda deactivate
+conda env remove -n gauntlet
+```
+
+### Python Version Requirements
+
+- **Minimum**: Python 3.10
+- **Recommended**: Python 3.11 or 3.12
+- **Maximum tested**: Python 3.12
 
 ---
 

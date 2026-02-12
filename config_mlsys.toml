@@ -1,0 +1,19 @@
+# ML Systems Paper Review Configuration
+# Reviewers: Systems (Kozyrakis), Robotics/ML (Abbeel), Vision/AI (Li)
+
+# Synthesizer persona (personas/{name}.md)
+synthesizer = "synthesizer_paper_analyst"
+
+# Expert-reviewer personas — order here controls combo-label order.
+# These personas review from systems, robotics/RL, and vision/AI perspectives
+[[personas]]
+name  = "christos_kozyrakis"
+short = "kozy"
+
+[[personas]]
+name  = "pieter_abbeel"
+short = "abbeel"
+
+[[personas]]
+name  = "fei-fei_li"
+short = "ffl"

@@ -1,0 +1,34 @@
+{
+  "personas": [
+    {
+      "name": "Gustavo Alonso",
+      "expertise": "Database Systems, Distributed Systems, Cloud Computing",
+      "url": "https://people.inf.ethz.ch/alonso/"
+    },
+    {
+      "name": "Torsten Hoefler",
+      "expertise": "High-Performance Computing, Parallel Computing, Network Architecture",
+      "url": "https://htor.inf.ethz.ch/"
+    },
+    {
+      "name": "Christos Kozyrakis",
+      "expertise": "Datacenters, Cloud Computing, Computer Architecture",
+      "url": "https://web.stanford.edu/~kozyraki/"
+    },
+    {
+      "name": "Fei-Fei Li",
+      "expertise": "Computer Vision, Machine Learning, Artificial Intelligence",
+      "url": "https://profiles.stanford.edu/fei-fei-li"
+    },
+    {
+      "name": "Pieter Abbeel",
+      "expertise": "Robotics, Reinforcement Learning, Machine Learning",
+      "url": "https://people.eecs.berkeley.edu/~pabbeel/"
+    },
+    {
+      "name": "Chelsea Finn",
+      "expertise": "Machine Learning, Robotics, Meta-Learning",
+      "url": "https://ai.stanford.edu/~cbfinn/"
+    }
+  ]
+}
